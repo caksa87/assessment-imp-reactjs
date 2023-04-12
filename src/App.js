@@ -4,26 +4,26 @@ import {
   useToast,
   Container,
   Heading,
+  Button,
   Stack,
   Card,
   CardBody,
-  Text,
-  Button
+  Text
 } from '@chakra-ui/react';
 
-const apiBaseUrl = 'https://jsonplaceholder.typicode.com/';
+const api = axios.create({ baseURL: "https://jsonplaceholder.typicode.com/"  });
 
 function App() {
   const [posts, setPost] = useState(null);
   const [posting, setPosting] = useState(true);
   const toast = useToast();
 
-  useEffect(() => {
-    axios.get(`${apiBaseUrl}posts`)
-      .then((response) => {
-        setPost(response.data)
-        setPosting(false)
-      })
+  useEffect(() => { getPost() }, []);
+
+  async function getPost() {
+    setPosting(true)
+    await api.get('posts')
+      .then((response) => { setPost(response.data) })
       .catch((error) => {
         toast({
           title: `Error ${error.response.code}`,
@@ -34,32 +34,56 @@ function App() {
           isClosable: true,
         })
       });
-  }, []);
+    setPosting(false)
+  }
 
-  function createPost() {
+  async function createPost() {
     setPosting(true)
-    axios.post(`${apiBaseUrl}posts`, {
+    await api.post('posts', {
       title: 'Hello World!',
       body: 'This is a new post.'
     })
-    .then((response) => {
-      setPost([response.data, ...posts])
-      setPosting(false)
-    })
-    .catch((error) => {
-      toast({
-        title: `Error ${error.response.code}`,
-        description: 'An error occured while posting',
-        status: 'error',
-        position: 'top-right',
-        duration: 2000,
-        isClosable: true,
-      })
-      setPosting(false)
-    });
+      .then((response) => { setPost([response.data, ...posts]) })
+      .catch((error) => {
+        toast({
+          title: `Error ${error.response.code}`,
+          description: 'An error occured while posting',
+          status: 'error',
+          position: 'top-right',
+          duration: 2000,
+          isClosable: true,
+        })
+      });
+    setPosting(false)
   }
 
-  if (!posts) return null;
+  async function deletePost(id) {
+    setPosting(true)
+    await api.delete(`posts/${id}`)
+      .then(() => {
+        posts.splice(posts.findIndex(post => post.id === id), 1);
+        toast({
+          title: `A post deleted`,
+          status: 'success',
+          position: 'top-right',
+          duration: 2000,
+          isClosable: true,
+        })
+      })
+      .catch((error) => {
+        toast({
+          title: `Error ${error.response.code}`,
+          description: 'An error occured while deleting a post',
+          status: 'error',
+          position: 'top-right',
+          duration: 2000,
+          isClosable: true,
+        })
+      });
+    setPosting(false)
+  }
+
+  if (!posts) return 'No post found';
 
   return (
     <Container>
@@ -83,6 +107,17 @@ function App() {
               <Text mt='.5rem'>
                 {post.body}
               </Text>
+              <Stack direction='row' justify='end' w="100%" mt='.5rem'>
+                <Button
+                  size='sm'
+                  colorScheme='red'
+                  isLoading={posting}
+                  loadingText='Deleting'
+                  onClick={() => deletePost(post.id)}
+                >
+                  Delete
+                </Button>
+              </Stack>
             </CardBody>
           </Card>
         ))}
