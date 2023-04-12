@@ -6,18 +6,29 @@ import {
   Stack,
   Card,
   CardBody,
-  Text
+  Text,
+  useToast
 } from '@chakra-ui/react';
 
 const apiBaseUrl = 'https://jsonplaceholder.typicode.com/';
 
 function App() {
   const [posts, setPost] = useState(null);
+  const toast = useToast();
 
   useEffect(() => {
-    axios.get(`${apiBaseUrl}posts`).then((response) => {
-      setPost(response.data);
-    });
+    axios.get(`${apiBaseUrl}posts`)
+      .then((response) => { setPost(response.data) })
+      .catch((error) => {
+        toast({
+          title: `Error ${error.response.code}`,
+          description: 'Ann error occured while getting post list',
+          status: 'error',
+          position: 'top-right',
+          duration: 2000,
+          isClosable: true,
+        })
+      });
   }, []);
 
   if (!posts) return null;
