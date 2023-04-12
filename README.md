@@ -12,11 +12,18 @@ Normally I separate parts of code into reusable component, but since it's a simp
  ## Run On Your Local
 
  1. Clone this project
+
  2. Install plugins
- `npm install`
+
+    `npm install`
+
  3. Run the application
- `npm start`
+
+    `npm start`
+
  4. Open in your browser
- *Normally it opened automatically when you run the project. But, if not:*
- Open your browser and enter [http://localhost:3000](http://localhost:3000)
+
+    *Normally it opened automatically when you run the project. But, if not:*
+
+    Open your browser and enter [http://localhost:3000](http://localhost:3000)
  
