@@ -27,7 +27,7 @@ function App() {
       .catch((error) => {
         toast({
           title: `Error ${error.response.code}`,
-          description: 'Ann error occured while getting post list',
+          description: 'An error occured while getting post list',
           status: 'error',
           position: 'top-right',
           duration: 2000,
@@ -44,6 +44,17 @@ function App() {
     })
     .then((response) => {
       setPost([response.data, ...posts])
+      setPosting(false)
+    })
+    .catch((error) => {
+      toast({
+        title: `Error ${error.response.code}`,
+        description: 'An error occured while posting',
+        status: 'error',
+        position: 'top-right',
+        duration: 2000,
+        isClosable: true,
+      })
       setPosting(false)
     });
   }
