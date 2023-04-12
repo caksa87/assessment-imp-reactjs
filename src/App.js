@@ -1,24 +1,45 @@
-import logo from './logo.svg';
-import './App.css';
+import {useState, useEffect} from 'react';
+import axios from 'axios';
+import {
+  Container,
+  Heading,
+  Stack,
+  Card,
+  CardBody,
+  Text
+} from '@chakra-ui/react';
+
+const apiBaseUrl = 'https://jsonplaceholder.typicode.com/';
 
 function App() {
+  const [posts, setPost] = useState(null);
+
+  useEffect(() => {
+    axios.get(`${apiBaseUrl}posts`).then((response) => {
+      setPost(response.data);
+    });
+  }, []);
+
+  if (!posts) return null;
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Container>
+      <Heading as='h1'>Post List</Heading>
+      <Stack spacing='1rem'>
+        {posts.map((post, index) => (
+          <Card key={index}>
+            <CardBody>
+              <Heading size='sm'>
+                {post.title}
+              </Heading>
+              <Text mt='.5rem'>
+                {post.body}
+              </Text>
+            </CardBody>
+          </Card>
+        ))}
+      </Stack>
+    </Container>
   );
 }
 
