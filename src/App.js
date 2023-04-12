@@ -1,19 +1,28 @@
 import {useState, useEffect} from 'react';
 import axios from 'axios';
+import {useForm} from 'react-hook-form';
 import {
   useToast,
   Container,
   Heading,
-  Button,
-  Stack,
   Card,
+  CardHeader,
   CardBody,
+  Stack,
+  FormControl,
+  FormLabel,
+  Input,
+  FormErrorMessage,
+  Textarea,
+  Button,
   Text
 } from '@chakra-ui/react';
 
 const api = axios.create({ baseURL: "https://jsonplaceholder.typicode.com/"  });
 
 function App() {
+  const {register, handleSubmit, formState: {errors}} = useForm();
+  const onSubmit = (data, e) => createPost(data, e);
   const [posts, setPost] = useState(null);
   const [posting, setPosting] = useState(true);
   const toast = useToast();
@@ -37,13 +46,16 @@ function App() {
     setPosting(false)
   }
 
-  async function createPost() {
+  async function createPost(data, e) {
     setPosting(true)
     await api.post('posts', {
-      title: 'Hello World!',
-      body: 'This is a new post.'
+      title: data.inputTitle,
+      body: data.inputBody
     })
-      .then((response) => { setPost([response.data, ...posts]) })
+      .then((response) => {
+        setPost([response.data, ...posts])
+        e.target.reset()
+      })
       .catch((error) => {
         toast({
           title: `Error ${error.response.code}`,
@@ -88,15 +100,43 @@ function App() {
   return (
     <Container>
       <Heading as='h1'>Post List</Heading>
-      <Button
-        size='sm'
-        colorScheme='blue'
-        isLoading={posting}
-        loadingText='Posting'
-        onClick={createPost}
-      >
-        Post
-      </Button>
+      <Card>
+        <CardHeader>
+          <Heading as='h2'>Add a new post</Heading>
+        </CardHeader>
+        <CardBody>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <Stack spacing='1rem'>
+              <FormControl>
+                <FormLabel>Title</FormLabel>
+                <Input {...register('inputTitle', { required: true })} type='text' isInvalid={errors.inputTitle} />
+                {errors.inputTitle && <FormErrorMessage>Title is required</FormErrorMessage>}
+              </FormControl>
+              <FormControl>
+                <FormLabel>Body</FormLabel>
+                <Textarea
+                  {...register('inputBody', { required: true })}
+                  rows='5'
+                  resize='none'
+                  isInvalid={errors.inputTitle}
+                  onKeyPress={e => e.key === 'Enter' && e.preventDefault()}
+                />
+                {errors.inputBody && <FormErrorMessage>Body is required</FormErrorMessage>}
+              </FormControl>
+              <Button
+                type='submit'
+                size='sm'
+                colorScheme='blue'
+                isLoading={posting}
+                loadingText='Posting'
+              >
+                Post
+              </Button>
+            </Stack>
+          </form>
+        </CardBody>
+      </Card>
+      <Heading as='h2' mt='3rem'>Posted</Heading>
       <Stack spacing='1rem' mt='1rem'>
         {posts.map((post, index) => (
           <Card key={index}>
